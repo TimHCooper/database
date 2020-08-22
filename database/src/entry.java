@@ -5,11 +5,11 @@ public class entry
 	public int id;
 	public String name;
 	public String fullname;
-	public TreeMap<String, String> colVals;
+	public TreeMap<String, String> fldVals;
 	
 	public entry(int i, String n)
 	{
-		colVals = new TreeMap<String, String>();
+		fldVals = new TreeMap<String, String>();
 		id = i;
 		name = n.substring(n.lastIndexOf(" ") + 1) + ", " + n.substring(0, n.lastIndexOf(" "));
 		fullname = n;
@@ -42,7 +42,7 @@ public class entry
 	
 	public byte compare(entry in, String compareType)
 	{
-		int compare = (colVals.get(compareType).toLowerCase().compareTo(in.colVals.get(compareType).toLowerCase()));
+		int compare = (fldVals.get(compareType).toLowerCase().compareTo(in.fldVals.get(compareType).toLowerCase()));
 		int compareAbs = Math.abs(compare);
 		if(compare != 0)
 			return (byte) -(compare/compareAbs);

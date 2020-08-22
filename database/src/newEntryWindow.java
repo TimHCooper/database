@@ -20,19 +20,19 @@ public class newEntryWindow implements ActionListener
 	private JPanel fnPanel;
 	private JPanel lnPanel;
 	private JPanel mnPanel;
-	private ArrayList<JPanel> colPanels = new ArrayList<JPanel>();
+	private ArrayList<JPanel> fldPanels = new ArrayList<JPanel>();
 	
 	private JTextField fnTextField = new JTextField(15);
 	private JTextField lnTextField = new JTextField(15);
 	private JTextField mnTextField = new JTextField(15);
-	private ArrayList<JTextField> colFields = new ArrayList<JTextField>();
+	private ArrayList<JTextField> fldFields = new ArrayList<JTextField>();
 	
 	private int id;
 	private JLabel idLabel;
 	private JLabel fnLabel = new JLabel("First Name*:");
 	private JLabel lnLabel = new JLabel("Last Name*:");
 	private JLabel mnLabel = new JLabel("Middle Name:");
-	private ArrayList<JLabel> colLabels = new ArrayList<JLabel>();
+	private ArrayList<JLabel> fldLabels = new ArrayList<JLabel>();
 	
 	private JButton saveButton = new JButton("Save");
 	
@@ -57,13 +57,13 @@ public class newEntryWindow implements ActionListener
 		lnPanel.add(lnLabel);
 		lnPanel.add(lnTextField);
 		
-		for(int i = 0; i < database.colsDisplay.size(); i++)
+		for(int i = 0; i < database.fieldDisplay.size(); i++)
 		{
-			colPanels.add(new JPanel(new FlowLayout(FlowLayout.RIGHT)));
-			colLabels.add(new JLabel(database.colsDisplay.get(i) + ":"));
-			colPanels.get(i).add(colLabels.get(i));
-			colFields.add(new JTextField(15));
-			colPanels.get(i).add(colFields.get(i));
+			fldPanels.add(new JPanel(new FlowLayout(FlowLayout.RIGHT)));
+			fldLabels.add(new JLabel(database.fieldDisplay.get(i) + ":"));
+			fldPanels.get(i).add(fldLabels.get(i));
+			fldFields.add(new JTextField(15));
+			fldPanels.get(i).add(fldFields.get(i));
 		}
 		
 		mainPanel = (JPanel) myFrame.getContentPane();
@@ -76,7 +76,7 @@ public class newEntryWindow implements ActionListener
 		mainPanel.add(mnPanel);
 		mainPanel.add(lnPanel);
 		
-		for(JPanel panel : colPanels)
+		for(JPanel panel : fldPanels)
 		{
 			mainPanel.add(panel);
 		}
@@ -114,9 +114,9 @@ public class newEntryWindow implements ActionListener
 			{
 				entry newEntry = new entry(id, fn + " " + ((!mnTextField.getText().isEmpty()) ?  
 						(mnTextField.getText() + " " + ln) : ln));
-				for(int i = 0; i < database.columns.size(); i++)
+				for(int i = 0; i < database.fields.size(); i++)
 				{
-					newEntry.colVals.put(database.columns.get(i), colFields.get(i).getText());
+					newEntry.fldVals.put(database.fields.get(i), fldFields.get(i).getText());
 				}
 				database.entries.add(newEntry);
 				databaseWindow.setWidths();

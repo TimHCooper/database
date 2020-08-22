@@ -7,40 +7,47 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
-public class delColWindow implements ActionListener
+public class editFldWindow implements ActionListener
 {
 	private JFrame myFrame = new JFrame();
 	private JPanel mainPanel;
 	
 	ArrayList<JRadioButton> albg = new ArrayList<JRadioButton>();
 	ButtonGroup bg = new ButtonGroup();
-	JButton saveButton = new JButton("Delete");
+	JButton saveButton = new JButton("Save");
 	
-	public delColWindow()
+	private JTextField editTextField = new JTextField(15);
+	
+	public editFldWindow()
 	{
-		myFrame.setTitle("Delete Column");
+		myFrame.setTitle("Edit field");
 		myFrame.setLocation(600, 300);
 		myFrame.setResizable(false);
 		
 		mainPanel = (JPanel) myFrame.getContentPane();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		mainPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED),
-				"Delete Column"));
+				"Edit field"));
 		
 		JRadioButton tButton;
-		for(String column : database.colsDisplay)
+		for(String field : database.fieldDisplay)
 		{
-			tButton = new JRadioButton(column);
+			tButton = new JRadioButton(field);
+			tButton.addActionListener(this);
 			albg.add(tButton);
 			bg.add(tButton);
 			mainPanel.add(tButton);
 		}
 		
+		mainPanel.add(new JLabel("\n"));
+		mainPanel.add(editTextField);
 		mainPanel.add(saveButton);
 		saveButton.addActionListener(this);
 		
@@ -52,7 +59,7 @@ public class delColWindow implements ActionListener
 	{
 		Object ob = e.getSource();
 		
-		if(ob == saveButton);
+		if(ob == saveButton)
 		{
 			String name = null;
 			for(JRadioButton button : albg)
@@ -66,26 +73,49 @@ public class delColWindow implements ActionListener
 			
 			if(name == null)
 			{
-				JOptionPane.showMessageDialog(null, "No column selected", 
-						"Delete Column", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(null, "No field selected", 
+						"Edit field", JOptionPane.WARNING_MESSAGE);
 			}
 			else
 			{
-				int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + name + "?", 
-						"Delete Column", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-				if(confirm == 0)
-				{
-					int index = database.colsDisplay.indexOf(name);
-					database.colsDisplay.remove(index);
-					database.columns.remove(index);
+					int index = database.fieldDisplay.indexOf(name);
+					String oldName = database.fields.get(index);
+					String newName = editTextField.getText();
+					
+					database.fieldDisplay.set(index, newName);
+					String fld;
+					if(newName.contains(" "))
+					{
+						fld = new String();
+						for(char c : newName.toCharArray())
+						{
+							fld += (c == ' ') ? '_' : c;
+						}
+					}
+					else
+						fld = newName;
+					database.fields.set(index, fld);
+					
+					for(entry Entry : database.entries)
+					{
+						Entry.fldVals.put(fld, Entry.fldVals.get(oldName));
+						Entry.fldVals.put(oldName, "");
+					}
+					
 					databaseWindow.updateData();
 					databaseWindow.updateBoxes();
 					databaseWindow.setWidths();
 					databaseWindow.sortUpdate();
 					
 					database.save();
-				}
+					
+					myFrame.setVisible(false);
+					myFrame.dispose();
 			}
+		}
+		else if(ob instanceof JRadioButton)
+		{
+			editTextField.setText(((JRadioButton) ob).getText());
 		}
 	}
 }

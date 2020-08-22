@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -19,17 +20,23 @@ import org.w3c.dom.NodeList;
 public class database 
 {
 	
-	public static ArrayList<String> colsDisplay;
-	public static ArrayList<String> columns;
+	public static ArrayList<String> fieldDisplay;
+	public static ArrayList<String> fields;
 	public static ArrayList<entry> entries;
 	
-	public static int maxid = 0;
+	public static int maxid = -1;
 	
 	public static void main(String[] args) 
 	{
-		colsDisplay = new ArrayList<String>();
-		columns = new ArrayList<String>();
+		fieldDisplay = new ArrayList<String>();
+		fields = new ArrayList<String>();
 		entries = new ArrayList<entry>();
+		init();
+		new databaseWindow();
+	}
+	
+	public static void init()
+	{
 		try 
 		{
 			File xmlDatabase = new File("database.xml");
@@ -38,28 +45,28 @@ public class database
 			Document doc = dBuilder.parse(xmlDatabase);
 			doc.getDocumentElement().normalize();
 			
-			NodeList NLcolumns = doc.getElementsByTagName("column");
+			NodeList NLfields = doc.getElementsByTagName("field");
 			
-			for(int i = 0; i < NLcolumns.getLength(); i++)
+			for(int i = 0; i < NLfields.getLength(); i++)
 			{
-				Node nNode = NLcolumns.item(i);
+				Node nNode = NLfields.item(i);
 				if(nNode.getNodeType() == Node.ELEMENT_NODE)
 				{
-					String column = nNode.getTextContent();
-					columns.add(column);
-					String col;
-					if(column.contains("_"))
+					String field = nNode.getTextContent();
+					fields.add(field);
+					String fld;
+					if(field.contains("_"))
 					{
-						col = new String();
-						for(char c : column.toCharArray())
+						fld = new String();
+						for(char c : field.toCharArray())
 						{
-							col += (c == '_') ? ' ' : c;
+							fld += (c == '_') ? ' ' : c;
 						}
 					}
 					else
-						col = column;
+						fld = field;
 					
-					colsDisplay.add(col);
+					fieldDisplay.add(fld);
 				}
 			}
 			
@@ -82,20 +89,26 @@ public class database
 					
 					entries.add(new entry(id, name));
 					
-					for(String column : columns)
+					for(String field : fields)
 					{
-						String val = eElement.getElementsByTagName(column).item(0).getTextContent();
-						entries.get(i).colVals.put(column, val);
+						String val = eElement.getElementsByTagName(field).item(0).getTextContent();
+						entries.get(i).fldVals.put(field, val);
 					}
 				}
 			}
-		} 
+		}
+		catch (IOException e)
+		{
+			save();
+			init();
+			/*System.out.println(e);
+			e.printStackTrace();*/
+		}
 		catch (Exception e)
 		{
 			System.out.println(e);
 			e.printStackTrace();
 		}
-		new databaseWindow();
 	}
 	
 	public static ArrayList<entry> sort(ArrayList<entry> in, int compareType)
@@ -123,7 +136,7 @@ public class database
 	
 	public static ArrayList<entry> sort(ArrayList<entry> in, String compareType)
 	{
-		//compare type is String column from database to compare alphabetically
+		//compare type is String field from database to compare alphabetically
 		//bubble sort implementation: O(n) best case, O(n^2) average, O(n^2) worst case
 		
 		boolean sorted = true;
@@ -174,7 +187,7 @@ public class database
 		default:
 			for(entry Entry : in)
 			{
-				if(Entry.colVals.get(columns.get(compareType - 2)).toLowerCase().contains(search.toLowerCase()))
+				if(Entry.fldVals.get(fields.get(compareType - 2)).toLowerCase().contains(search.toLowerCase()))
 				{
 					searchedList.add(Entry);
 				}
@@ -197,15 +210,15 @@ public class database
 			Element root = document.createElement("database");
 			document.appendChild(root);
 			
-			Element Ecolumns = document.createElement("columns");
-			root.appendChild(Ecolumns);
+			Element Efields = document.createElement("fields");
+			root.appendChild(Efields);
 			
 			Element element;
-			for(String column : columns)
+			for(String field : fields)
 			{
-				element = document.createElement("column");
-				element.appendChild(document.createTextNode(column));
-				Ecolumns.appendChild(element);
+				element = document.createElement("field");
+				element.appendChild(document.createTextNode(field));
+				Efields.appendChild(element);
 			}
 			
 			Element Eentries = document.createElement("entries");
@@ -228,10 +241,10 @@ public class database
 				name.appendChild(document.createTextNode(entries.get(i).fullname));
 				entry.appendChild(name);
 				
-				for(String column : columns)
+				for(String field : fields)
 				{
-					element = document.createElement(column);
-					element.appendChild(document.createTextNode(entries.get(i).colVals.get(column)));
+					element = document.createElement(field);
+					element.appendChild(document.createTextNode(entries.get(i).fldVals.get(field)));
 					entry.appendChild(element);
 				}
 			}

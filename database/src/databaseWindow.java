@@ -22,8 +22,8 @@ public class databaseWindow implements ActionListener
 {
 	public static boolean searched = false;
 	
-	private static ArrayList<String> colsDisplay;
-	private static ArrayList<String> columns;
+	private static ArrayList<String> fieldDisplay;
+	private static ArrayList<String> fields;
 	private static ArrayList<entry> entries;
 	private static ArrayList<entry> searchedEntries;
 	
@@ -42,9 +42,9 @@ public class databaseWindow implements ActionListener
 	private static JTable dataTable = null;
 	private static JScrollPane dataScrollPane = null;
 	
-	private JButton addColButton = null;
-	private JButton delColButton = null;
-	private JButton editColButton = null;
+	private JButton addfldButton = null;
+	private JButton delfldButton = null;
+	private JButton editfldButton = null;
 	private JButton searchButton = null;
 	private JButton newButton = null;
 	private JButton delButton = null;
@@ -58,8 +58,8 @@ public class databaseWindow implements ActionListener
 	
 	public databaseWindow()
 	{
-		colsDisplay = database.colsDisplay;
-		columns = database.columns;
+		fieldDisplay = database.fieldDisplay;
+		fields = database.fields;
 		entries = database.entries;
 		searchedEntries = entries;
 		
@@ -67,7 +67,7 @@ public class databaseWindow implements ActionListener
 		sortBox = new JComboBox<String>();
 		updateBoxes();
 		
-		maxWidths = new int[colsDisplay.size() + 2];
+		maxWidths = new int[fieldDisplay.size() + 2];
 		for(int i = 0; i < maxWidths.length; i++)
 		{
 			maxWidths[i] = 0;
@@ -88,18 +88,18 @@ public class databaseWindow implements ActionListener
 		managePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED),
 				"Database Management"));
 		
-		addColButton = new JButton("Add Column");
-		delColButton = new JButton("Delete Column");
-		editColButton = new JButton("Edit Column");
-		addColButton.addActionListener(this);
-		delColButton.addActionListener(this);
-		editColButton.addActionListener(this);
+		addfldButton = new JButton("Add Field");
+		delfldButton = new JButton("Delete Field");
+		editfldButton = new JButton("Edit Field");
+		addfldButton.addActionListener(this);
+		delfldButton.addActionListener(this);
+		editfldButton.addActionListener(this);
 		
 		JPanel manageButtonPanel = new JPanel();
 		
-		manageButtonPanel.add(addColButton);
-		manageButtonPanel.add(delColButton);
-		manageButtonPanel.add(editColButton);
+		manageButtonPanel.add(addfldButton);
+		manageButtonPanel.add(delfldButton);
+		manageButtonPanel.add(editfldButton);
 		managePanel.add(manageButtonPanel);
 		
 		mainPanel.add(managePanel);
@@ -180,7 +180,7 @@ public class databaseWindow implements ActionListener
 	
 	private static JTable buildTable(ArrayList<entry> in) 
 	{
-		String[][] entriesA = new String[in.size()][colsDisplay.size() + 2];
+		String[][] entriesA = new String[in.size()][fieldDisplay.size() + 2];
 		
 		//build required vars for JTable
 		for(int i = 0; i < in.size(); i++)
@@ -194,30 +194,30 @@ public class databaseWindow implements ActionListener
         	entriesA[i][1] = name;
         	
         	
-        	for(int n = 0; n < colsDisplay.size(); n++)
+        	for(int n = 0; n < fieldDisplay.size(); n++)
         	{
-        		entriesA[i][n+2] = tEntry.colVals.get(columns.get(n));
+        		entriesA[i][n+2] = tEntry.fldVals.get(fields.get(n));
         	}
 		}
 		
-		String[] COLUMNS = new String[colsDisplay.size() + 2];
-		COLUMNS[0] = "ID";
-		COLUMNS[1] = "Name";
-		for(int i = 0; i < colsDisplay.size(); i++)
+		String[] fields = new String[fieldDisplay.size() + 2];
+		fields[0] = "ID";
+		fields[1] = "Name";
+		for(int i = 0; i < fieldDisplay.size(); i++)
 		{
-			COLUMNS[i + 2] = colsDisplay.get(i);
+			fields[i + 2] = fieldDisplay.get(i);
 		}
 		
-		JTable tempDataTable = new JTable(entriesA, COLUMNS);
+		JTable tempDataTable = new JTable(entriesA, fields);
 		
 		//set width of table to be used
 		int i = 0;
         for(int width : maxWidths)
         {
-        	TableColumn column = tempDataTable.getColumnModel().getColumn(i++);
-        	column.setMinWidth(20);
-        	column.setMaxWidth(500);
-        	column.setPreferredWidth(width);
+        	TableColumn fldumn = tempDataTable.getColumnModel().getColumn(i++);
+        	fldumn.setMinWidth(20);
+        	fldumn.setMaxWidth(500);
+        	fldumn.setPreferredWidth(width);
         }
 		
 		return tempDataTable;
@@ -327,24 +327,24 @@ public class databaseWindow implements ActionListener
 				System.out.println(ex.getStackTrace());
 			}
 		}
-		else if(ob == addColButton)
+		else if(ob == addfldButton)
 		{
-			String colName = JOptionPane.showInputDialog("What column do you want to add?");
-			if(colName != null && !colName.isEmpty())
+			String fldName = JOptionPane.showInputDialog("What field do you want to add?");
+			if(fldName != null && !fldName.isEmpty())
 				{
-				database.colsDisplay.add(colName);
-				String col;
-				if(colName.contains(" "))
+				database.fieldDisplay.add(fldName);
+				String fld;
+				if(fldName.contains(" "))
 				{
-					col = new String();
-					for(char c : colName.toCharArray())
+					fld = new String();
+					for(char c : fldName.toCharArray())
 					{
-						col += (c == ' ') ? '_' : c;
+						fld += (c == ' ') ? '_' : c;
 					}
 				}
 				else
-					col = colName;
-				database.columns.add(col);
+					fld = fldName;
+				database.fields.add(fld);
 			
 				infoPanel.remove(dataScrollPane);
 				if(!searched)
@@ -370,13 +370,15 @@ public class databaseWindow implements ActionListener
 		    	updateData();
 			}
 		}
-		else if(ob == delColButton)
+		else if(ob == delfldButton)
 		{
-			new delColWindow();
+			if(!fields.isEmpty())
+				new delFldWindow();
 		}
-		else if(ob == editColButton)
+		else if(ob == editfldButton)
 		{
-			new editColWindow();
+			if(!fields.isEmpty())
+				new editFldWindow();
 		}
 		else if(ob == editButton)
 		{
@@ -410,7 +412,7 @@ public class databaseWindow implements ActionListener
 		}
 		else
 		{
-			String compareType = columns.get(colsDisplay.indexOf((String) sortBox.getSelectedItem()));
+			String compareType = fields.get(fieldDisplay.indexOf((String) sortBox.getSelectedItem()));
 			//System.out.println(compareType);
 			ArrayList<entry> tempSortList = new ArrayList<entry>();
 			ArrayList<entry> tempSortEList = new ArrayList<entry>();
@@ -419,7 +421,7 @@ public class databaseWindow implements ActionListener
 			
 			for(entry Entry : entries)
 			{
-				if(!Entry.colVals.get(compareType).isEmpty())
+				if(!Entry.fldVals.get(compareType).isEmpty())
 				{
 					tempSortList.add(Entry);
 				}
@@ -429,7 +431,7 @@ public class databaseWindow implements ActionListener
 			
 			for(entry EntryS : searchedEntries)
 			{
-				if(!EntryS.colVals.get(compareType).isEmpty())
+				if(!EntryS.fldVals.get(compareType).isEmpty())
 				{
 					tempSearchList.add(EntryS);
 				}
@@ -470,7 +472,7 @@ public class databaseWindow implements ActionListener
 	{
 		g = infoPanel.getGraphics();
 		
-		maxWidths = new int[colsDisplay.size() + 2];
+		maxWidths = new int[fieldDisplay.size() + 2];
 		
         for(entry Entry : entries)
         {
@@ -483,18 +485,22 @@ public class databaseWindow implements ActionListener
         		maxWidths[1] = namelen;
         }
         
-        for(int i = 0; i < colsDisplay.size(); i++)
+        for(int i = 0; i < fieldDisplay.size(); i++)
         {
-        	String targetCol = columns.get(i);
+        	String targetfld = fields.get(i);
+        	int targetlen;
         	for(entry Entry : entries)
         	{
-        		if(Entry.colVals.get(targetCol) != null)
+        		if(Entry.fldVals.get(targetfld) != null)
         		{
-        			int targetlen = g.getFontMetrics().stringWidth(Entry.colVals.get(targetCol));
+        			targetlen = g.getFontMetrics().stringWidth(Entry.fldVals.get(targetfld));
         			if(targetlen > maxWidths[i + 2])
         				maxWidths[i + 2] = targetlen;
         		}
         	}
+        	targetlen = g.getFontMetrics().stringWidth(fieldDisplay.get(i));
+        	if(targetlen > maxWidths[i + 2])
+        		maxWidths[i + 2] = targetlen;
         }
         
         int sum = 0;
@@ -504,26 +510,28 @@ public class databaseWindow implements ActionListener
         }
         
         size = sum + 100;
+        if(size <= 500)
+        	size = 500;
 	}
 	public static void updateBoxes()
 	{
-		sortOptions = new String[colsDisplay.size() + 3];
+		sortOptions = new String[fieldDisplay.size() + 3];
 		sortOptions[0] = "ID";
 		sortOptions[1] = "Name (A-Z)";
 		sortOptions[2] = "Name (Z-A)";
 		
 		for(int i = 3; i < sortOptions.length; i++)
 		{
-			sortOptions[i] = colsDisplay.get(i - 3);
+			sortOptions[i] = fieldDisplay.get(i - 3);
 		}
 		
-		searchOptions = new String[colsDisplay.size() + 2];
+		searchOptions = new String[fieldDisplay.size() + 2];
 		searchOptions[0] = "ID";
 		searchOptions[1] = "Name";
 		
-		for(int i = 0; i < colsDisplay.size(); i++)
+		for(int i = 0; i < fieldDisplay.size(); i++)
 		{
-			searchOptions[i+2] = colsDisplay.get(i);
+			searchOptions[i+2] = fieldDisplay.get(i);
 		}
 		
 		DefaultComboBoxModel<String> sortModel = new DefaultComboBoxModel<String>(sortOptions);
@@ -537,8 +545,8 @@ public class databaseWindow implements ActionListener
 	
 	public static void updateData()
 	{
-		columns = database.columns;
-		colsDisplay = database.colsDisplay;
+		fields = database.fields;
+		fieldDisplay = database.fieldDisplay;
 		entries = database.entries;
 	}
 }
